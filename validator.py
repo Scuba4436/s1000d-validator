@@ -4,6 +4,7 @@ from lxml import etree
 import os
 import io
 import uuid
+import re
 
 # Setup directories
 SCHEMAS_DIR = "schemas"
@@ -21,15 +22,29 @@ if is_view_mode:
     file_dir = os.path.join(TEMP_XML_DIR, xml_id)
     if os.path.exists(file_dir) and os.path.isdir(file_dir):
         files = os.listdir(file_dir)
-        if files:
-            file_to_open = os.path.join(file_dir, files[0])
-            filename = files[0]
+        raw_file = next((f for f in files if f.startswith("raw_")), None)
+        pretty_file = next((f for f in files if f.startswith("pretty_")), None)
+        
+        if not files:
+            st.error("Die XML-Datei wurde nicht gefunden.")
+        else:
+            # Fallback falls die Dateien noch nach altem Namensschema gespeichert wurden
+            if not raw_file and not pretty_file:
+                raw_file = files[0]
+                
+            filename = raw_file[4:] if (raw_file and raw_file.startswith("raw_")) else raw_file
+            st.title(f"XML Ansicht: {filename}")
+            
+            if raw_file and pretty_file:
+                mode = st.radio("Ansichtsmodus:", ["Original (für exakte Zeilennummern)", "Formatiert (Beautified)"], horizontal=True)
+                file_to_open = os.path.join(file_dir, raw_file if "Original" in mode else pretty_file)
+            else:
+                st.info("Diese Datei konnte nicht geparst werden oder liegt nur in einem Format vor. Es wird die verfügbare Ansicht angezeigt.")
+                file_to_open = os.path.join(file_dir, raw_file or pretty_file)
+                
             with open(file_to_open, "r", encoding="utf-8") as f:
                 xml_content = f.read()
-            st.title(f"XML Ansicht: {filename}")
             st.code(xml_content, language="xml", line_numbers=True)
-        else:
-            st.error("Die XML-Datei wurde nicht gefunden.")
     else:
         st.error("Die XML-Datei wurde nicht gefunden. Möglicherweise ist die Sitzung abgelaufen.")
     
@@ -129,8 +144,8 @@ st.markdown("Lade XML-Dateien hoch, um sie auf Syntax und gegen XSD-Schemas zu v
 st.markdown("ℹ️ **Angewendete Schemas:** Offizielles XML Schema Package der [ASD S1000D Issue 4.2](https://www.s-series.org/s1000d/)")
 
 def parse_xml(file_bytes):
-    """Parses XML and checks for well-formedness."""
-    parser = etree.XMLParser(recover=False)
+    """Parses XML and checks for well-formedness. Allows loading external DTDs like ISOEntities."""
+    parser = etree.XMLParser(recover=False, no_network=False, load_dtd=True)
     try:
         tree = etree.parse(io.BytesIO(file_bytes), parser)
         return tree, True, "Erfolgreich"
@@ -183,6 +198,51 @@ def find_local_xsd(schema_hint):
         
     return None
 
+def translate_error(msg):
+    if "[facet 'pattern'] The value" in msg and "(cm|in|mm|pc|pt)" in msg:
+        val = re.search(r"The value '(.*?)'", msg)
+        v = val.group(1) if val else "Unbekannt"
+        return f"Fehlende oder falsche Maßeinheit für Wert '{v}'. Erlaubt sind z.B. 'mm', 'cm', 'in', 'pt'."
+    if "[facet 'enumeration'] The value" in msg and "is not an element of the set" in msg:
+        val = re.search(r"The value '(.*?)'", msg)
+        v = val.group(1) if val else "Unbekannt"
+        return f"Der Wert '{v}' ist ungültig (nicht in der vorgegebenen Liste)."
+    if "[facet 'pattern'] The value" in msg:
+        val = re.search(r"The value '(.*?)'", msg)
+        pat = re.search(r"pattern '(.*?)'", msg)
+        v = val.group(1) if val else "Unbekannt"
+        p = pat.group(1) if pat else ""
+        return f"Der Wert '{v}' hat das falsche Format (Erwartet: '{p}')."
+    if "This element is not expected." in msg:
+        expected = re.search(r"Expected is one of (.*?)\.", msg)
+        if expected:
+            return f"Tag an dieser Stelle nicht erlaubt. Erwartet wird: {expected.group(1)}."
+        expected_single = re.search(r"Expected is (.*?)\.", msg)
+        if expected_single:
+             return f"Tag an dieser Stelle nicht erlaubt. Erwartet wird: {expected_single.group(1)}."
+        return "Tag an dieser Stelle laut Schema nicht erlaubt."
+    if "Missing child element(s)." in msg:
+        expected = re.search(r"Expected is (.*?)\.", msg)
+        if expected:
+            return f"Struktur unvollständig. Es fehlt: {expected.group(1)}."
+        return "Struktur unvollständig. Es fehlen Unter-Elemente."
+    if "is not allowed" in msg and "attribute" in msg.lower():
+         attr = re.search(r"attribute '(.*?)'", msg)
+         a = attr.group(1) if attr else "Unbekannt"
+         return f"Das Attribut '{a}' ist hier nicht erlaubt."
+    return msg
+
+def format_error(line, message):
+    parts = message.split(": ", 1)
+    if len(parts) > 1 and ("Element " in parts[0] or "attribute " in parts[0]):
+        context = parts[0].replace("Element ", "<").replace("', attribute", "> | Attribut").replace("'", "")
+        if "<" in context and ">" not in context: context += ">"
+        reason = parts[1]
+        friendly_reason = translate_error(reason)
+        return f"Zeile {line} [{context}]: {friendly_reason}"
+    else:
+        return f"Zeile {line}: {translate_error(message)}"
+
 def validate_xml(tree, xsd_path):
     """Validates XML tree against given XSD path."""
     try:
@@ -192,7 +252,10 @@ def validate_xml(tree, xsd_path):
         if schema.validate(tree):
             return True, "Erfolgreich"
         else:
-            errors = "; ".join([f"Zeile {err.line}: {err.message}" for err in schema.error_log])
+            errors_list = []
+            for err in schema.error_log:
+                errors_list.append(format_error(err.line, err.message))
+            errors = " | ".join(errors_list)
             return False, errors
             
     except Exception as e:
@@ -215,23 +278,26 @@ if uploaded_files:
         safe_filename = "".join([c for c in filename if c.isalnum() or c in (' ', '.', '-', '_')]).rstrip()
         if not safe_filename:
             safe_filename = "unnamed.xml"
-        temp_filepath = os.path.join(file_dir, safe_filename)
+            
+        raw_filepath = os.path.join(file_dir, f"raw_{safe_filename}")
+        pretty_filepath = os.path.join(file_dir, f"pretty_{safe_filename}")
         
         # 1. Parsing
         tree, parse_success, parse_msg = parse_xml(file_bytes)
         
-        # Save beautified or raw XML
+        # Immer die Originaldatei speichern (für korrekte Zeilennummern bei Validierungsfehlern)
+        try:
+            raw_xml = file_bytes.decode('utf-8')
+        except:
+            raw_xml = str(file_bytes)
+        with open(raw_filepath, "w", encoding="utf-8") as f:
+            f.write(raw_xml)
+            
+        # Wenn geparst werden konnte, auch eine formatierte Version speichern
         if parse_success:
             beautified_xml = etree.tostring(tree, pretty_print=True, encoding='unicode')
-            with open(temp_filepath, "w", encoding="utf-8") as f:
+            with open(pretty_filepath, "w", encoding="utf-8") as f:
                 f.write(beautified_xml)
-        else:
-            try:
-                raw_xml = file_bytes.decode('utf-8')
-            except:
-                raw_xml = str(file_bytes)
-            with open(temp_filepath, "w", encoding="utf-8") as f:
-                f.write(raw_xml)
         
         if not parse_success:
             results.append({
