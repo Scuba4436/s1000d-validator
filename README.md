@@ -1,4 +1,4 @@
-# XML Validator (ASD S1000D Issue 4.2)
+# S1000D Validator (ASD S1000D Issue 4.2)
 
 Eine moderne, Streamlit-basierte Web-Applikation zur schnellen und automatisierten Validierung von XML-Dateien. Die App ist speziell darauf ausgelegt, XML-Dateien auf korrekte Syntax und gegen spezifische XSD-Schemas (insbesondere aus dem offiziellen ASD S1000D Issue 4.2 Schema Package) zu prüfen.
 
