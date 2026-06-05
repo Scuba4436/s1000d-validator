@@ -1,6 +1,6 @@
-# S1000D Validator (ASD S1000D Issue 4.2)
+# S1000D Validator (ASD S1000D IIssues 2.3, 3.0, 4.0.1, 4.1, 4.2 und 5.0)
 
-Eine moderne, Streamlit-basierte Web-Applikation zur schnellen und automatisierten Validierung von XML-Dateien. Die App ist speziell darauf ausgelegt, XML-Dateien auf korrekte Syntax und gegen spezifische XSD-Schemas (insbesondere aus dem offiziellen ASD S1000D Issue 4.2 Schema Package) zu prüfen.
+Eine moderne, Streamlit-basierte Web-Applikation zur schnellen und automatisierten Validierung von XML-Dateien. Die App ist darauf ausgelegt, XML-Dateien auf korrekte Syntax und gegen spezifische XSD-Schemas (insbesondere aus dem offiziellen ASD S1000D Issues 2.3, 3.0, 4.0.1, 4.1, 4.2 und 5.0 Schema Package) zu prüfen.
 
 ## 🚀 Funktionen
 
@@ -16,14 +16,13 @@ Eine moderne, Streamlit-basierte Web-Applikation zur schnellen und automatisiert
 
 ## 🛠️ Bedienung
 
-1. **Schemas vorbereiten**: Stelle sicher, dass die benötigten `.xsd`-Dateien im Ordner `schemas/` direkt im Projektverzeichnis liegen. (Die App erstellt diesen Ordner beim ersten Start automatisch, falls er nicht existiert).
-2. **App starten**: Führe die App wie unten beschrieben aus. Es öffnet sich automatisch dein Browser.
-3. **Validieren**: Ziehe deine XML-Dateien in das gestrichelte Feld. Die Validierung startet sofort.
-4. **Ergebnisse prüfen**:
+1. **App starten**: Führe die App wie unten beschrieben aus. Es öffnet sich automatisch dein Browser.
+2. **Validieren**: Ziehe deine XML-Dateien in das gestrichelte Feld. Die Validierung startet sofort.
+3. **Ergebnisse prüfen**:
    - Die Zusammenfassung zeigt dir die Erfolgsquote auf einen Blick.
    - In der Detailtabelle siehst du genaue Fehlermeldungen inkl. Zeilennummer, falls eine Datei ungültig ist.
    - Ein Klick auf den Dateinamen öffnet die XML in einer gut lesbaren Ansicht zur direkten Fehlersuche.
-5. **Exportieren**: Mit dem Button "Ergebnisse als Excel (.xlsx)" oben rechts über der Tabelle kannst du den Bericht sichern.
+4. **Exportieren**: Mit dem Button "Ergebnisse als Excel (.xlsx)" oben rechts über der Tabelle kannst du den Bericht sichern.
 
 ---
 
@@ -87,5 +86,5 @@ Eine moderne, Streamlit-basierte Web-Applikation zur schnellen und automatisiert
 ---
 
 ### Hinweise zur Fehlerbehebung
-- **Kein passendes Schema gefunden?** Prüfe, ob die `.xsd`-Datei im Ordner `schemas/` liegt und der Dateiname (oder ein Teil davon) mit dem im XML-Root-Element referenzierten Schema übereinstimmt.
+- **Kein passendes Schema gefunden?** Prüfe, ob die `.xsd`-Datei im Ordner `schemas/` im entsprechenden Unterordner für die S1000D Version liegt. Der Dateiname muss mit dem im XML-Root-Element referenzierten Schema übereinstimmen.
 - **Port belegt?** Falls Port `8501` bereits genutzt wird, sucht Streamlit automatisch den nächsten freien Port (z. B. `8502`). Die Konsolenausgabe zeigt dir immer die richtige lokale URL an.

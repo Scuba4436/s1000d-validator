@@ -1,0 +1,481 @@
+<!DOCTYPE dmodule [
+<!NOTATION cgm PUBLIC "-//USA-DOD//NOTATION Computer Graphics Metafile//EN" >
+<!ENTITY ICN-S1000DBIKE-AAA-D000000-0-U8025-00537-A-04-1 SYSTEM "./illustrations/ICN-S1000DBIKE-AAA-D000000-0-U8025-00537-A-04-1.CGM" NDATA cgm>
+]>
+<dmodule xmlns:dc="http://www.purl.org/dc/elements/1.1/" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://www.s1000d.org/S1000D_4-0/xml_schema_flat/ipd.xsd"><rdf:Description><dc:creator>U8025</dc:creator><dc:title>Light system - Illustrated Parts Data - IPD</dc:title><dc:subject>Light system - Illustrated Parts Data - IPD</dc:subject><dc:publisher>U8025</dc:publisher><dc:contributor>U8025</dc:contributor><dc:date>2008-08-01</dc:date><dc:type>text</dc:type><dc:format>text/xml</dc:format><dc:identifier>S1000DLIGHTING-AAA-D00-00-00-00AA-941A-D_006-00</dc:identifier><dc:language>en-US</dc:language><dc:rights>01_cc51_cv51</dc:rights></rdf:Description>
+<identAndStatusSection>
+<dmAddress>
+<dmIdent><dmCode modelIdentCode="S1000DLIGHTING" systemDiffCode="AAA" systemCode="D00" subSystemCode="0" subSubSystemCode="0" assyCode="00" disassyCode="00" disassyCodeVariant="AA" infoCode="941" infoCodeVariant="A" itemLocationCode="D"/>  <language countryIsoCode="US" languageIsoCode="en"/>
+<issueInfo issueNumber="006" inWork="00"/></dmIdent>
+<dmAddressItems>
+<issueDate year="2008" month="08" day="01"/><dmTitle>
+<techName>Light system</techName>
+<infoName>Illustrated Parts Data - IPD</infoName>
+</dmTitle>
+</dmAddressItems></dmAddress>
+<dmStatus issueType="revised">
+<security securityClassification="01" commercialClassification="cc51" caveat="cv51"/>
+<dataRestrictions>
+<restrictionInstructions>
+<dataDistribution>To be made available to all S1000D users.</dataDistribution>
+<exportControl><exportRegistrationStmt>
+<simplePara>Export of this data module to all countries that are the residence of organizations that are users of S1000D is permitted. Storage of this data module is to be at the discretion of the organization.</simplePara>
+</exportRegistrationStmt></exportControl>
+<dataHandling>There are no specific handling instructions for this data module.</dataHandling>
+<dataDestruction>Users may destroy this data module in accordance with their own local procedures.</dataDestruction>
+<dataDisclosure>There are no dissemination limitations that apply to this data module.</dataDisclosure>
+</restrictionInstructions>
+<restrictionInfo>
+<copyright>
+<copyrightPara><emphasis>Copyright (C) 2008</emphasis> by each of the following organizations:<randomList>
+<listItem><para>AeroSpace and Defence Industries Associations of Europe - ASD.</para></listItem>
+<listItem><para>Ministries of Defence of the member countries of ASD.</para></listItem>
+</randomList></copyrightPara>
+<copyrightPara><emphasis>Limitations of Liability:</emphasis></copyrightPara>
+<copyrightPara><randomList>
+<listItem><para>This material is provided "As Is" and neither ASD nor any person who has contributed to the creation, revision or maintenance of the material makes any representations or warranties, express or implied, including but not limited to, warranties of merchantability or fitness for any particular purpose.</para></listItem>
+<listItem><para>Neither ASD nor any person who has contributed to the creation, revision or maintenance of this material shall be liable for any direct, indirect, special or consequential damages or any other liability arising from any use of this material.</para></listItem>
+<listItem><para>Revisions to this document may occur after its issuance.  The user is responsible for determining if revisions to the material contained in this document have occurred and are applicable.</para></listItem>
+</randomList></copyrightPara>
+</copyright>
+<policyStatement>TPSMG TOR 001</policyStatement>
+<dataConds>There are no known conditions that would change the data restrictions for, or security classification of, this data module.</dataConds>
+</restrictionInfo>
+</dataRestrictions>
+<responsiblePartnerCompany enterpriseCode="U8025">
+<enterpriseName>UK MoD</enterpriseName></responsiblePartnerCompany>
+<originator enterpriseCode="U8025">
+<enterpriseName>UK MoD</enterpriseName></originator>
+<applicCrossRefTableRef>
+<dmRef xlink:type="simple" xlink:actuate="onRequest" xlink:show="replace" xlink:href="URN:S1000D:DMC-S1000DBIKE-AAA-D00-00-00-00AA-00WA-D"><dmRefIdent><dmCode modelIdentCode="S1000DBIKE" systemDiffCode="AAA" systemCode="D00" subSystemCode="0" subSubSystemCode="0" assyCode="00" disassyCode="00" disassyCodeVariant="AA" infoCode="00W" infoCodeVariant="A" itemLocationCode="D"/>
+</dmRefIdent></dmRef></applicCrossRefTableRef>
+<applic>
+<displayText><simplePara>Mountain bicycle and (Mountain storm Mk1 or Brook trekker Mk9)</simplePara></displayText>
+<evaluate andOr="and">
+<assert applicPropertyIdent="type" applicPropertyType="prodattr" applicPropertyValues="Mountain bicycle"/>
+<evaluate andOr="or">
+<evaluate andOr="and">
+<assert applicPropertyIdent="model" applicPropertyType="prodattr" applicPropertyValues="Mountain storm"/>
+<assert applicPropertyIdent="version" applicPropertyType="prodattr" applicPropertyValues="Mk1"/>
+</evaluate>
+<evaluate andOr="and">
+<assert applicPropertyIdent="model" applicPropertyType="prodattr" applicPropertyValues="Brook trekker"/>
+<assert applicPropertyIdent="version" applicPropertyType="prodattr" applicPropertyValues="Mk9"/>
+</evaluate>
+</evaluate>
+</evaluate>
+</applic>
+<techStandard>
+<authorityInfoAndTp>
+<authorityInfo>20010131</authorityInfo>
+<techPubBase>Bike book</techPubBase>
+</authorityInfoAndTp>
+<authorityExceptions/>
+<authorityNotes/>
+</techStandard>
+<brexDmRef>
+<dmRef xlink:type="simple" xlink:actuate="onRequest" xlink:show="replace" xlink:href="URN:S1000D:DMC-S1000DBIKE-AAA-D00-00-00-00AA-022A-D_007-00">
+<dmRefIdent>
+<dmCode modelIdentCode="S1000DBIKE" systemDiffCode="AAA" systemCode="D00" subSystemCode="0" subSubSystemCode="0" assyCode="00" disassyCode="00" disassyCodeVariant="AA" infoCode="022" infoCodeVariant="A" itemLocationCode="D"/>
+<issueInfo issueNumber="007" inWork="00"/>
+</dmRefIdent>
+</dmRef>
+</brexDmRef>
+<qualityAssurance>
+<firstVerification verificationType="tabtop"/>
+</qualityAssurance>
+<systemBreakdownCode>LT</systemBreakdownCode>
+<skillLevel skillLevelCode="sk01"/>
+<reasonForUpdate><simplePara>totally revised</simplePara><simplePara>Schema cleanup element/attribute renaming</simplePara></reasonForUpdate>
+<remarks>
+<simplePara>This DM was originally named DMC-S1000DBIKE-AAA-D00-00-00-00AA-941A-A</simplePara>
+</remarks></dmStatus>
+</identAndStatusSection>
+<content>
+<illustratedPartsCatalog>
+<figure id="fig-00001">
+<title>Light system</title>
+<graphic xlink:type="simple" xlink:href="URN:S1000D:ICN-S1000DBIKE-AAA-D000000-0-U8025-00537-A-04-1" xlink:title="Light system" infoEntityIdent="ICN-S1000DBIKE-AAA-D000000-0-U8025-00537-A-04-1"/>
+</figure>
+<initialProvisioningProject initialProvisioningProjectNumber="KZ7771111" initialProvisioningProjectNumberSubject="LIGHT SYSTEM" fileIdent="s"/>
+<catalogSeqNumber catalogSeqNumberValue="D00000000A000 " indenture="1">  <!--catalogItemNumber="000 "-->
+<itemSequenceNumber itemSeqNumberValue="00A">
+<reasonForSelection reasonForSelectionValue="1"/>
+<quantityPerNextHigherAssy>REF</quantityPerNextHigherAssy>
+<manufacturerCode>KZ777</manufacturerCode>
+<!--<partNumber>LRU1001</partNumber>-->
+<partNumber>LRU1001</partNumber>
+<partIdentSegment>
+<descrForPart>Light system</descrForPart>
+<unitOfIssue>EA</unitOfIssue>
+<specialStorage>1</specialStorage>
+<physicalSecurityPilferageCode>J</physicalSecurityPilferageCode>
+</partIdentSegment>
+<partLocationSegment/>
+<locationRcmdSegment><locationRcmd>
+<service>UKA</service>
+<sourceMaintRecoverability>PAFFD</sourceMaintRecoverability>
+</locationRcmd>
+</locationRcmdSegment>
+</itemSequenceNumber>
+</catalogSeqNumber>
+<catalogSeqNumber catalogSeqNumberValue="D00000000A001 " indenture="2">
+<itemSequenceNumber itemSeqNumberValue="00A">
+<reasonForSelection reasonForSelectionValue="1"/>
+<quantityPerNextHigherAssy>1</quantityPerNextHigherAssy>
+<manufacturerCode>KZ777</manufacturerCode>
+<partNumber>LRU1010</partNumber>
+<partIdentSegment>
+<descrForPart>Light, sub-assembly front</descrForPart>
+<unitOfIssue>EA</unitOfIssue>
+<specialStorage>1</specialStorage>
+</partIdentSegment>
+<partLocationSegment>
+<descrForLocation>FRONT</descrForLocation>
+</partLocationSegment>
+<locationRcmdSegment>
+<locationRcmd>
+<service>UKA</service>
+<sourceMaintRecoverability>PAODF</sourceMaintRecoverability>
+</locationRcmd>
+</locationRcmdSegment>
+</itemSequenceNumber>
+</catalogSeqNumber>
+<catalogSeqNumber catalogSeqNumberValue="D00000000A002 " indenture="3">
+<itemSequenceNumber itemSeqNumberValue="00A">
+<reasonForSelection reasonForSelectionValue="1"/>
+<quantityPerNextHigherAssy>1</quantityPerNextHigherAssy>
+<manufacturerCode>KZ777</manufacturerCode>
+<partNumber>LRU1011</partNumber>
+<partIdentSegment>
+<descrForPart>Light, main body</descrForPart>
+<unitOfIssue>EA</unitOfIssue>
+<specialStorage>0</specialStorage>
+</partIdentSegment>
+<partLocationSegment/>
+<locationRcmdSegment><locationRcmd>
+<service>UKA</service>
+<sourceMaintRecoverability>PAFFD</sourceMaintRecoverability>
+</locationRcmd></locationRcmdSegment>
+</itemSequenceNumber>
+</catalogSeqNumber>
+<catalogSeqNumber catalogSeqNumberValue="D00000000A003 " indenture="4">
+<itemSequenceNumber itemSeqNumberValue="00A">
+<reasonForSelection reasonForSelectionValue="1"/>
+<quantityPerNextHigherAssy>1</quantityPerNextHigherAssy>
+<manufacturerCode>KZ777</manufacturerCode>
+<partNumber>LRU1012</partNumber>
+<partIdentSegment>
+<descrForPart>Light, base</descrForPart>
+<unitOfIssue>EA</unitOfIssue>
+<specialStorage>0</specialStorage>
+</partIdentSegment>
+<partLocationSegment/>
+<locationRcmdSegment><locationRcmd>
+<service>UKA</service>
+<sourceMaintRecoverability>PAFFD</sourceMaintRecoverability>
+</locationRcmd></locationRcmdSegment>
+</itemSequenceNumber>
+</catalogSeqNumber>
+<catalogSeqNumber catalogSeqNumberValue="D00000000A004 " indenture="5">
+<itemSequenceNumber itemSeqNumberValue="00A">
+<reasonForSelection reasonForSelectionValue="1"/>
+<quantityPerNextHigherAssy>1</quantityPerNextHigherAssy>
+<manufacturerCode>KZ777</manufacturerCode>
+<partNumber>LRU1013</partNumber>
+<partIdentSegment>
+<descrForPart>Seal</descrForPart>
+<unitOfIssue>EA</unitOfIssue>
+<specialStorage>0</specialStorage>
+</partIdentSegment>
+<partLocationSegment/>
+<locationRcmdSegment><locationRcmd>
+<service>UKA</service>
+<sourceMaintRecoverability>PAFFD</sourceMaintRecoverability>
+</locationRcmd></locationRcmdSegment>
+</itemSequenceNumber>
+</catalogSeqNumber>
+<catalogSeqNumber catalogSeqNumberValue="D00000000A005 " indenture="4">
+<itemSequenceNumber itemSeqNumberValue="00A">
+<reasonForSelection reasonForSelectionValue="1"/>
+<quantityPerNextHigherAssy>2</quantityPerNextHigherAssy>
+<manufacturerCode>KZ777</manufacturerCode>
+<partNumber>LIRUS-L1-10</partNumber>
+<partIdentSegment>
+<descrForPart>Battery</descrForPart>
+<unitOfIssue>BX</unitOfIssue>
+<unitOfIssueQualificationSegment unitOfMeasure="EA">
+<quantityPerUnit>1</quantityPerUnit>
+</unitOfIssueQualificationSegment>
+<specialStorage>1</specialStorage>
+</partIdentSegment>
+<partLocationSegment/>
+<locationRcmdSegment><locationRcmd>
+<service>UKA</service>
+<sourceMaintRecoverability>PAFFD</sourceMaintRecoverability>
+</locationRcmd></locationRcmdSegment>
+</itemSequenceNumber>
+</catalogSeqNumber>
+<catalogSeqNumber catalogSeqNumberValue="D00000000A006 " indenture="3">
+<itemSequenceNumber itemSeqNumberValue="00A">
+<reasonForSelection reasonForSelectionValue="1"/>
+<quantityPerNextHigherAssy>1</quantityPerNextHigherAssy>
+<manufacturerCode>KZ777</manufacturerCode>
+<partNumber>LRU1018</partNumber>
+<partIdentSegment>
+<descrForPart>Lens, assembly</descrForPart>
+<unitOfIssue>EA</unitOfIssue>
+<specialStorage>0</specialStorage>
+</partIdentSegment>
+<partLocationSegment/>
+<locationRcmdSegment><locationRcmd>
+<service>UKA</service>
+<sourceMaintRecoverability>PAFFD</sourceMaintRecoverability>
+</locationRcmd></locationRcmdSegment>
+</itemSequenceNumber>
+</catalogSeqNumber>
+<catalogSeqNumber catalogSeqNumberValue="D00000000A007 " indenture="4">
+<itemSequenceNumber itemSeqNumberValue="00A">
+<reasonForSelection reasonForSelectionValue="1"/>
+<quantityPerNextHigherAssy>1</quantityPerNextHigherAssy>
+<manufacturerCode>KZ777</manufacturerCode>
+<partNumber>LRU1019</partNumber>
+<partIdentSegment>
+<descrForPart>Lens sub-assembly</descrForPart>
+<unitOfIssue>EA</unitOfIssue>
+<specialStorage>0</specialStorage>
+</partIdentSegment>
+<partLocationSegment/>
+<locationRcmdSegment><locationRcmd>
+<service>UKA</service>
+<sourceMaintRecoverability>PAFFD</sourceMaintRecoverability>
+</locationRcmd></locationRcmdSegment>
+</itemSequenceNumber>
+</catalogSeqNumber>
+<catalogSeqNumber catalogSeqNumberValue="D00000000A008 " indenture="5">
+<itemSequenceNumber itemSeqNumberValue="00A">
+<reasonForSelection reasonForSelectionValue="1"/>
+<quantityPerNextHigherAssy>1</quantityPerNextHigherAssy>
+<manufacturerCode>KZ777</manufacturerCode>
+<partNumber>LRU1022</partNumber>
+<partIdentSegment>
+<descrForPart>Seal</descrForPart>
+<unitOfIssue>EA</unitOfIssue>
+<specialStorage>0</specialStorage>
+</partIdentSegment>
+<partLocationSegment/>
+<locationRcmdSegment><locationRcmd>
+<service>UKA</service>
+<sourceMaintRecoverability>PAFFD</sourceMaintRecoverability>
+</locationRcmd></locationRcmdSegment>
+</itemSequenceNumber>
+</catalogSeqNumber>
+<catalogSeqNumber catalogSeqNumberValue="D00000000A009 " indenture="4">
+<itemSequenceNumber itemSeqNumberValue="00A">
+<reasonForSelection reasonForSelectionValue="1"/>
+<quantityPerNextHigherAssy>1</quantityPerNextHigherAssy>
+<manufacturerCode>KZ777</manufacturerCode>
+<partNumber>LRU1020</partNumber>
+<partIdentSegment>
+<descrForPart>Reflector</descrForPart>
+<unitOfIssue>EA</unitOfIssue>
+<specialStorage>0</specialStorage>
+</partIdentSegment>
+<partLocationSegment/>
+<locationRcmdSegment><locationRcmd>
+<service>UKA</service>
+<sourceMaintRecoverability>PAFFD</sourceMaintRecoverability>
+</locationRcmd></locationRcmdSegment>
+</itemSequenceNumber>
+</catalogSeqNumber>
+<catalogSeqNumber catalogSeqNumberValue="D00000000A010 " indenture="5">
+<itemSequenceNumber itemSeqNumberValue="00A">
+<reasonForSelection reasonForSelectionValue="1"/>
+<quantityPerNextHigherAssy>2</quantityPerNextHigherAssy>
+<manufacturerCode>KZ777</manufacturerCode>
+<partNumber>LIRUS-L1-11</partNumber>
+<partIdentSegment>
+<descrForPart>Bulb</descrForPart>
+<unitOfIssue>EA</unitOfIssue>
+<specialStorage>1</specialStorage>
+</partIdentSegment>
+<partLocationSegment/>
+<locationRcmdSegment><locationRcmd>
+<service>UKA</service>
+<sourceMaintRecoverability>PAFFD</sourceMaintRecoverability>
+</locationRcmd></locationRcmdSegment>
+</itemSequenceNumber>
+</catalogSeqNumber>
+<catalogSeqNumber catalogSeqNumberValue="D00000000A011 " indenture="3">
+<itemSequenceNumber itemSeqNumberValue="00A">
+<reasonForSelection reasonForSelectionValue="1"/>
+<quantityPerNextHigherAssy>1</quantityPerNextHigherAssy>
+<manufacturerCode>KZ777</manufacturerCode>
+<partNumber>LRU1026</partNumber>
+<partIdentSegment>
+<descrForPart>Loom wiring</descrForPart>
+<unitOfIssue>EA</unitOfIssue>
+<specialStorage>0</specialStorage>
+</partIdentSegment>
+<partLocationSegment/>
+<locationRcmdSegment><locationRcmd>
+<service>UKA</service>
+<sourceMaintRecoverability>PAFFD</sourceMaintRecoverability>
+</locationRcmd></locationRcmdSegment>
+</itemSequenceNumber>
+</catalogSeqNumber>
+<catalogSeqNumber catalogSeqNumberValue="D00000000A012 " indenture="2">
+<itemSequenceNumber itemSeqNumberValue="00A">
+<reasonForSelection reasonForSelectionValue="1"/>
+<quantityPerNextHigherAssy>1</quantityPerNextHigherAssy>
+<manufacturerCode>KZ777</manufacturerCode>
+<partNumber>LRU-B001</partNumber>
+<partIdentSegment>
+<descrForPart>Bracket, light mounting</descrForPart>
+<unitOfIssue>EA</unitOfIssue>
+<specialStorage>0</specialStorage>
+</partIdentSegment>
+<partLocationSegment/>
+<locationRcmdSegment><locationRcmd>
+<service>UKA</service>
+<sourceMaintRecoverability>PAFFD</sourceMaintRecoverability>
+</locationRcmd></locationRcmdSegment>
+</itemSequenceNumber>
+</catalogSeqNumber>
+<catalogSeqNumber catalogSeqNumberValue="D00000000A013 " indenture="3">
+<itemSequenceNumber itemSeqNumberValue="00A">
+<reasonForSelection reasonForSelectionValue="1"/>
+<quantityPerNextHigherAssy>1</quantityPerNextHigherAssy>
+<manufacturerCode>KZ777</manufacturerCode>
+<partNumber>LRU-B003</partNumber>
+<partIdentSegment>
+<descrForPart>Clip</descrForPart>
+<unitOfIssue>EA</unitOfIssue>
+<specialStorage>0</specialStorage>
+</partIdentSegment>
+<partLocationSegment/>
+<locationRcmdSegment><locationRcmd>
+<service>UKA</service>
+<sourceMaintRecoverability>PAFFD</sourceMaintRecoverability>
+</locationRcmd></locationRcmdSegment>
+</itemSequenceNumber>
+</catalogSeqNumber>
+<catalogSeqNumber catalogSeqNumberValue="D00000000A014 " indenture="3">
+<itemSequenceNumber itemSeqNumberValue="00A">
+<reasonForSelection reasonForSelectionValue="1"/>
+<quantityPerNextHigherAssy>1</quantityPerNextHigherAssy>
+<manufacturerCode>KZ777</manufacturerCode>
+<partNumber>LRU-B124</partNumber>
+<partIdentSegment>
+<descrForPart>Screw,special</descrForPart>
+<unitOfIssue>BX</unitOfIssue>
+<unitOfIssueQualificationSegment unitOfMeasure="EA">
+<quantityPerUnit>1</quantityPerUnit>
+</unitOfIssueQualificationSegment>
+<specialStorage>0</specialStorage>
+</partIdentSegment>
+<partLocationSegment>
+<attachStoreShipPart attachStoreShipPartCode="1"/>
+</partLocationSegment>
+<locationRcmdSegment><locationRcmd>
+<service>UKA</service>
+<sourceMaintRecoverability>PAFFD</sourceMaintRecoverability>
+</locationRcmd></locationRcmdSegment>
+</itemSequenceNumber>
+</catalogSeqNumber>
+<catalogSeqNumber catalogSeqNumberValue="D00000000A015 " indenture="3">
+<itemSequenceNumber itemSeqNumberValue="00A">
+<reasonForSelection reasonForSelectionValue="1"/>
+<quantityPerNextHigherAssy>1</quantityPerNextHigherAssy>
+<manufacturerCode>KZ777</manufacturerCode>
+<partNumber>LRU-B556</partNumber>
+<partIdentSegment>
+<descrForPart>Washer,flat</descrForPart>
+<unitOfIssue>BX</unitOfIssue>
+<unitOfIssueQualificationSegment unitOfMeasure="EA">
+<quantityPerUnit>1</quantityPerUnit>
+</unitOfIssueQualificationSegment>
+<specialStorage>0</specialStorage>
+</partIdentSegment>
+<partLocationSegment>
+<attachStoreShipPart attachStoreShipPartCode="1"/>
+</partLocationSegment>
+<locationRcmdSegment><locationRcmd>
+<service>UKA</service>
+<sourceMaintRecoverability>PAFFD</sourceMaintRecoverability>
+</locationRcmd></locationRcmdSegment>
+</itemSequenceNumber>
+</catalogSeqNumber>
+<catalogSeqNumber catalogSeqNumberValue="D00000000A016 " indenture="4">
+<itemSequenceNumber itemSeqNumberValue="00A">
+<reasonForSelection reasonForSelectionValue="1"/>
+<quantityPerNextHigherAssy>1</quantityPerNextHigherAssy>
+<manufacturerCode>KZ777</manufacturerCode>
+<partNumber>LRU-B789</partNumber>
+<partIdentSegment>
+<descrForPart>Grip,strip</descrForPart>
+<unitOfIssue>EA</unitOfIssue>
+<specialStorage>0</specialStorage>
+</partIdentSegment>
+<partLocationSegment/>
+<locationRcmdSegment><locationRcmd>
+<service>UKA</service>
+<sourceMaintRecoverability>PAFFD</sourceMaintRecoverability>
+</locationRcmd></locationRcmdSegment>
+</itemSequenceNumber>
+</catalogSeqNumber>
+<catalogSeqNumber catalogSeqNumberValue="D00000000A017 " indenture="2">
+<itemSequenceNumber itemSeqNumberValue="00A">
+<reasonForSelection reasonForSelectionValue="1"/>
+<quantityPerNextHigherAssy>1</quantityPerNextHigherAssy>
+<manufacturerCode>KZ777</manufacturerCode>
+<partNumber>LRU2010</partNumber>
+<partIdentSegment>
+<descrForPart>Light, sub assembly rear</descrForPart>
+</partIdentSegment>
+<partLocationSegment/>
+<locationRcmdSegment><locationRcmd>
+<service>UKA</service>
+<sourceMaintRecoverability>PAFFD</sourceMaintRecoverability>
+</locationRcmd></locationRcmdSegment>
+</itemSequenceNumber>
+</catalogSeqNumber>
+<catalogSeqNumber catalogSeqNumberValue="D00000000A018 " indenture="3">
+<itemSequenceNumber itemSeqNumberValue="00A">
+<reasonForSelection reasonForSelectionValue="1"/>
+<quantityPerNextHigherAssy>1</quantityPerNextHigherAssy>
+<manufacturerCode>KZ777</manufacturerCode>
+<partNumber>LRU1011</partNumber>
+<partIdentSegment>
+<descrForPart>Light, main body</descrForPart>
+<unitOfIssue>EA</unitOfIssue>
+<specialStorage>0</specialStorage>
+</partIdentSegment>
+<partLocationSegment>
+<descrForLocation>REAR</descrForLocation>
+</partLocationSegment>
+<locationRcmdSegment><locationRcmd>
+<service>UKA</service>
+<sourceMaintRecoverability>PAFFD</sourceMaintRecoverability>
+</locationRcmd></locationRcmdSegment>
+</itemSequenceNumber>
+</catalogSeqNumber>
+<catalogSeqNumber catalogSeqNumberValue="D00000000A019 " indenture="3">
+<itemSequenceNumber itemSeqNumberValue="00A">
+<reasonForSelection reasonForSelectionValue="1"/>
+<quantityPerNextHigherAssy>1</quantityPerNextHigherAssy>
+<manufacturerCode>KZ777</manufacturerCode>
+<partNumber>LRU2018</partNumber>
+<partIdentSegment>
+<descrForPart>Lens, assembly rear</descrForPart>
+</partIdentSegment>
+<partLocationSegment/>
+<locationRcmdSegment><locationRcmd>
+<service>UKA</service>
+<sourceMaintRecoverability>PAFFD</sourceMaintRecoverability>
+</locationRcmd></locationRcmdSegment>
+</itemSequenceNumber>
+</catalogSeqNumber>
+</illustratedPartsCatalog>
+</content>
+</dmodule>

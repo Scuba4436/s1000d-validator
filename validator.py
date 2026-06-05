@@ -1,3 +1,4 @@
+# pyrefly: ignore [missing-import]
 import streamlit as st
 import pandas as pd
 from lxml import etree
@@ -141,7 +142,7 @@ st.markdown(custom_css, unsafe_allow_html=True)
 
 st.title("XML Validator")
 st.markdown("Lade XML-Dateien hoch, um sie auf Syntax und gegen XSD-Schemas zu validieren.")
-st.markdown("ℹ️ **Angewendete Schemas:** Offizielles XML Schema Package der [ASD S1000D Issue 4.2](https://www.s-series.org/s1000d/)")
+st.markdown("ℹ️ **Angewendete Schemas:** Offizielle XML Schema Packages der **ASD S1000D Issues 2.3, 3.0, 4.0.1, 4.1, 4.2 und 5.0** (automatische Erkennung)")
 
 def parse_xml(file_bytes):
     """Parses XML and checks for well-formedness. Allows loading external DTDs like ISOEntities."""
@@ -154,49 +155,188 @@ def parse_xml(file_bytes):
     except Exception as e:
         return None, False, str(e)
 
-def detect_schema(tree):
-    """Tries to detect schema from root element."""
+@st.cache_resource
+def load_schema(xsd_path):
+    """Parses and compiles an XSD schema from the given path, cached by Streamlit."""
+    schema_doc = etree.parse(xsd_path)
+    return etree.XMLSchema(schema_doc)
+
+# Available issues in priority order
+ISSUES = [
+    {"name": "5.0", "folder": "5-0"},
+    {"name": "4.2", "folder": "4-2"},
+    {"name": "4.1", "folder": "4-1"},
+    {"name": "4.0.1", "folder": "4-0-1"},
+    {"name": "3.0", "folder": "3-0"},
+    {"name": "2.3", "folder": "2-3"},
+]
+
+def detect_issue_and_xsd(tree):
+    """Detects S1000D issue version and selects corresponding schema file."""
     root = tree.getroot()
     xsi_ns = "http://www.w3.org/2001/XMLSchema-instance"
     
-    # Check for xsi:noNamespaceSchemaLocation
+    # Extract schema hint
+    schema_hint = None
+    version_check_str = ""
     no_ns_loc = root.get(f"{{{xsi_ns}}}noNamespaceSchemaLocation")
     if no_ns_loc:
-        return no_ns_loc.split('/')[-1]
-
-    # Check for xsi:schemaLocation
-    schema_loc = root.get(f"{{{xsi_ns}}}schemaLocation")
-    if schema_loc:
-        # schemaLocation typically contains namespace and location separated by space
-        parts = schema_loc.split()
-        if len(parts) >= 2:
-            return parts[1].split('/')[-1] # Returning the location part
-        return parts[0].split('/')[-1]
-        
-    # Check namespace
-    nsmap = root.nsmap
-    if None in nsmap:
-        return nsmap[None]
-        
-    return "Unbekannt"
-
-def find_local_xsd(schema_hint):
-    """Finds a matching XSD in the schemas directory."""
-    if not schema_hint or schema_hint == "Unbekannt":
-        return None
-        
-    available_xsds = [f for f in os.listdir(SCHEMAS_DIR) if f.endswith('.xsd')]
+        schema_hint = no_ns_loc.strip()
+        version_check_str = schema_hint
+    else:
+        schema_loc = root.get(f"{{{xsi_ns}}}schemaLocation")
+        if schema_loc:
+            parts = schema_loc.split()
+            if len(parts) >= 2:
+                schema_hint = parts[1].strip()
+            else:
+                schema_hint = parts[0].strip()
+            version_check_str = schema_loc
     
-    # Simple heuristic: Does the hint match an exact filename?
-    for xsd in available_xsds:
-        if xsd in schema_hint or schema_hint in xsd:
-            return os.path.join(SCHEMAS_DIR, xsd)
-            
-    # Default to the first one if there's only one, or return None
-    if len(available_xsds) == 1:
-        return os.path.join(SCHEMAS_DIR, available_xsds[0])
+    # Extract schema filename (e.g. descript.xsd)
+    schema_file = None
+    if schema_hint:
+        schema_file = schema_hint.split('/')[-1].split('\\')[-1]
         
-    return None
+    # Collect all potential URI strings to check for version info
+    uris_to_check = []
+    if version_check_str:
+        uris_to_check.append(version_check_str)
+    # Also add root namespaces
+    for ns_uri in root.nsmap.values():
+        if ns_uri:
+            uris_to_check.append(ns_uri)
+            
+    # First attempt: Detect from URIs or namespaces
+    detected_issue = None
+    for uri in uris_to_check:
+        uri_lower = uri.lower()
+        if "5-0" in uri_lower or "5.0" in uri_lower:
+            detected_issue = next(i for i in ISSUES if i["name"] == "5.0")
+            break
+        elif "4-2" in uri_lower or "4.2" in uri_lower:
+            detected_issue = next(i for i in ISSUES if i["name"] == "4.2")
+            break
+        elif "4-1" in uri_lower or "4.1" in uri_lower:
+            detected_issue = next(i for i in ISSUES if i["name"] == "4.1")
+            break
+        elif "4-0-1" in uri_lower or "4.0.1" in uri_lower or "4-0" in uri_lower or "4.0" in uri_lower:
+            detected_issue = next(i for i in ISSUES if i["name"] == "4.0.1")
+            break
+        elif "3-0" in uri_lower or "3.0" in uri_lower:
+            detected_issue = next(i for i in ISSUES if i["name"] == "3.0")
+            break
+        elif "2-3" in uri_lower or "2.3" in uri_lower:
+            detected_issue = next(i for i in ISSUES if i["name"] == "2.3")
+            break
+    
+    # Second attempt: check DOCTYPE system ID if schema_hint didn't work or was ambiguous
+    if not detected_issue and tree.docinfo.system_url:
+        sys_url_lower = tree.docinfo.system_url.lower()
+        if "5-0" in sys_url_lower or "5.0" in sys_url_lower:
+            detected_issue = next(i for i in ISSUES if i["name"] == "5.0")
+        elif "4-2" in sys_url_lower or "4.2" in sys_url_lower:
+            detected_issue = next(i for i in ISSUES if i["name"] == "4.2")
+        elif "4-1" in sys_url_lower or "4.1" in sys_url_lower:
+            detected_issue = next(i for i in ISSUES if i["name"] == "4.1")
+        elif "4-0-1" in sys_url_lower or "4.0.1" in sys_url_lower or "4-0" in sys_url_lower or "4.0" in sys_url_lower:
+            detected_issue = next(i for i in ISSUES if i["name"] == "4.0.1")
+        elif "3-0" in sys_url_lower or "3.0" in sys_url_lower:
+            detected_issue = next(i for i in ISSUES if i["name"] == "3.0")
+        elif "2-3" in sys_url_lower or "2.3" in sys_url_lower:
+            detected_issue = next(i for i in ISSUES if i["name"] == "2.3")
+            
+        if not schema_file:
+            base_name = tree.docinfo.system_url.split('/')[-1].split('\\')[-1]
+            if base_name:
+                if base_name.endswith('.dtd'):
+                    schema_file = base_name[:-4] + '.xsd'
+                else:
+                    schema_file = base_name
+
+    # Third attempt: structural heuristics
+    if not detected_issue:
+        if root.find(".//idstatus") is not None:
+            if root.find(".//status/srcdmaddres") is not None:
+                detected_issue = next(i for i in ISSUES if i["name"] == "3.0")
+            elif root.find(".//idstatus/srcdmaddres") is not None:
+                detected_issue = next(i for i in ISSUES if i["name"] == "2.3")
+            elif root.find(".//applic/displaytext") is not None:
+                detected_issue = next(i for i in ISSUES if i["name"] == "3.0")
+            elif root.find(".//applic/type") is not None or root.find(".//applic/model") is not None:
+                detected_issue = next(i for i in ISSUES if i["name"] == "2.3")
+            else:
+                detected_issue = next(i for i in ISSUES if i["name"] == "3.0")
+
+    # Resolve schema path and fallback search
+    xsd_path = None
+    if schema_file:
+        if detected_issue:
+            potential_path = os.path.join(SCHEMAS_DIR, detected_issue["folder"], schema_file)
+            if os.path.exists(potential_path):
+                xsd_path = potential_path
+        
+        # If not found in detected issue folder, or not yet detected, try checking all folders
+        if not xsd_path:
+            for issue in ISSUES:
+                p = os.path.join(SCHEMAS_DIR, issue["folder"], schema_file)
+                if os.path.exists(p):
+                    # If we don't have a detected issue, check if it validates
+                    if not detected_issue:
+                        try:
+                            schema = load_schema(p)
+                            if schema.validate(tree):
+                                detected_issue = issue
+                                xsd_path = p
+                                break
+                        except:
+                            pass
+                    else:
+                        xsd_path = p
+                        break
+            
+            # Final fallback: first folder containing the file
+            if not xsd_path:
+                for issue in ISSUES:
+                    p = os.path.join(SCHEMAS_DIR, issue["folder"], schema_file)
+                    if os.path.exists(p):
+                        xsd_path = p
+                        if not detected_issue:
+                            detected_issue = issue
+                        break
+
+    # If no schema file found, infer by tag
+    if not xsd_path:
+        tag_to_schema = {
+            "dmodule": "descript.xsd",
+            "pm": "pm.xsd",
+            "ddn": "ddn.xsd",
+            "dml": "dml.xsd",
+            "brex": "brex.xsd",
+            "appliccrossreftable": "appliccrossreftable.xsd",
+            "condcrossreftable": "condcrossreftable.xsd",
+            "prdcrossreftable": "prdcrossreftable.xsd",
+            "container": "container.xsd",
+        }
+        tag = root.tag
+        if "}" in tag:
+            tag = tag.split("}")[1]
+        inferred_file = tag_to_schema.get(tag)
+        if inferred_file:
+            schema_file = inferred_file
+            if detected_issue:
+                p = os.path.join(SCHEMAS_DIR, detected_issue["folder"], schema_file)
+                if os.path.exists(p):
+                    xsd_path = p
+            else:
+                for issue in ISSUES:
+                    p = os.path.join(SCHEMAS_DIR, issue["folder"], schema_file)
+                    if os.path.exists(p):
+                        xsd_path = p
+                        detected_issue = issue
+                        break
+                        
+    return detected_issue, xsd_path, schema_hint or "Unbekannt"
 
 def translate_error(msg):
     if "[facet 'pattern'] The value" in msg and "(cm|in|mm|pc|pt)" in msg:
@@ -246,8 +386,7 @@ def format_error(line, message):
 def validate_xml(tree, xsd_path):
     """Validates XML tree against given XSD path."""
     try:
-        schema_doc = etree.parse(xsd_path)
-        schema = etree.XMLSchema(schema_doc)
+        schema = load_schema(xsd_path)
         
         if schema.validate(tree):
             return True, "Erfolgreich"
@@ -303,6 +442,7 @@ if uploaded_files:
             results.append({
                 "__xml_id": xml_id,
                 "Dateiname": filename,
+                "Erkannter Issue": "N/A",
                 "Status (Parsing)": "Fehlerhaft",
                 "Status (Validierung)": "N/A",
                 "Angewendetes Schema": "N/A",
@@ -310,17 +450,17 @@ if uploaded_files:
             })
             continue
             
-        # 2. Schema Detection
-        schema_hint = detect_schema(tree)
-        xsd_path = find_local_xsd(schema_hint)
+        # 2. Schema Detection & Version Detection
+        detected_issue, xsd_path, schema_hint = detect_issue_and_xsd(tree)
         
         if not xsd_path:
             results.append({
                 "__xml_id": xml_id,
                 "Dateiname": filename,
+                "Erkannter Issue": f"Issue {detected_issue['name']}" if detected_issue else "Unbekannt",
                 "Status (Parsing)": "Erfolgreich",
                 "Status (Validierung)": "Fehlerhaft",
-                "Angewendetes Schema": f"Nicht gefunden ({schema_hint})",
+                "Angewendetes Schema": f"Nicht gefunden ({schema_hint})" if schema_hint else "Nicht gefunden",
                 "Fehlerdetails": "Kein passendes XSD im /schemas/ Ordner gefunden."
             })
             continue
@@ -332,6 +472,7 @@ if uploaded_files:
         results.append({
             "__xml_id": xml_id,
             "Dateiname": filename,
+            "Erkannter Issue": f"Issue {detected_issue['name']}" if detected_issue else "Unbekannt",
             "Status (Parsing)": "Erfolgreich",
             "Status (Validierung)": "Erfolgreich" if val_success else "Fehlerhaft",
             "Angewendetes Schema": xsd_filename,
@@ -417,6 +558,6 @@ else:
     
     with st.expander("Hinweise zur Verwendung"):
         st.markdown(f'''
-        1. Stelle sicher, dass XSD-Dateien im Ordner `{os.path.abspath(SCHEMAS_DIR)}` liegen.
-        2. Die Applikation sucht im Root-Element der XML nach `xsi:schemaLocation` oder Namespaces, um das passende Schema zu finden.
+        1. Stelle sicher, dass die XSD-Dateien in den entsprechenden Unterordnern für die S1000D Issues im Ordner `{os.path.abspath(SCHEMAS_DIR)}` liegen (z. B. `schemas/2-3/`, `schemas/3-0/`, `schemas/4-0-1/`, `schemas/4-1/`, `schemas/4-2/`, `schemas/5-0/`).
+        2. Die Applikation sucht im Root-Element der XML nach `xsi:noNamespaceSchemaLocation`, `xsi:schemaLocation`, DOCTYPE-Angaben oder Namespaces, um den S1000D Issue automatisch zu bestimmen und das passende Schema anzuwenden.
         ''')
