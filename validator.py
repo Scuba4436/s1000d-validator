@@ -6,13 +6,73 @@ import os
 import io
 import uuid
 import re
+import shutil
+import time
+import socket
+import concurrent.futures
 
-# Setup directories
+# Setup directories with memory protection constants
 SCHEMAS_DIR = "schemas"
 TEMP_XML_DIR = "temp_xml_files"
+MAX_TEMP_DIRS = 50  # Limitierung temporärer Verzeichnisse (Memory Protection)
+socket.setdefaulttimeout(30)  # Timeout für Parsing großer Dateien
 for d in [SCHEMAS_DIR, TEMP_XML_DIR]:
     if not os.path.exists(d):
         os.makedirs(d)
+
+def sanitize_filename(filename):
+    """Sichert Filenamen vor Path-Traversal und XSS-Angriffen."""
+    base, ext = os.path.splitext(filename)
+    dangerous_patterns = ['..', '<script>', 'javascript:', 'onload', 'onclick']
+    for pattern in dangerous_patterns:
+        base = re.sub(pattern.lower(), '', base, flags=re.IGNORECASE)
+    sanitized = "".join(c for c in base if c.isalnum() or c in (' ', '.', '-', '_', '@'))
+    sanitized = sanitized.strip()
+    return (sanitized or "unnamed") + ext
+
+def cleanup_expired_temp_files(max_age_hours=12):
+    """
+    Löscht alle Unterverzeichnisse in TEMP_XML_DIR, die älter als max_age_hours sind.
+    Entfernt auch alte Verzeichnisse, wenn Limit (MAX_TEMP_DIRS) erreicht.
+    """
+    if not os.path.exists(TEMP_XML_DIR):
+        return
+
+    now = time.time()
+    max_age_seconds = max_age_hours * 3600
+
+    # Alle Unterverzeichnisse auflisten und nach Änderungszeit sortieren
+    dirs = []
+    for entry in os.listdir(TEMP_XML_DIR):
+        path = os.path.join(TEMP_XML_DIR, entry)
+        if os.path.isdir(path):
+            dirs.append((path, os.path.getmtime(path)))
+            
+    # Sortieren nach mtime (älteste zuerst)
+    dirs.sort(key=lambda x: x[1])
+
+    # 1. Ältere Verzeichnisse löschen (> max_age_hours)
+    remaining_dirs = []
+    for path, mtime in dirs:
+        if (now - mtime) > max_age_seconds:
+            try:
+                shutil.rmtree(path)
+            except Exception:
+                pass
+        else:
+            remaining_dirs.append(path)
+
+    # 2. Wenn Limit überschritten, die ältesten verbleibenden löschen
+    if len(remaining_dirs) > MAX_TEMP_DIRS:
+        to_delete = remaining_dirs[:len(remaining_dirs) - MAX_TEMP_DIRS]
+        for path in to_delete:
+            try:
+                shutil.rmtree(path)
+            except Exception:
+                pass
+
+# Führe Bereinigung einmalig beim Start aus
+cleanup_expired_temp_files()
 
 is_view_mode = "view_xml" in st.query_params
 
@@ -21,6 +81,14 @@ if is_view_mode:
     xml_id = st.query_params["view_xml"]
     
     file_dir = os.path.join(TEMP_XML_DIR, xml_id)
+    
+    # Pfad-Traversal absichern
+    resolved_path = os.path.abspath(file_dir)
+    base_path = os.path.abspath(TEMP_XML_DIR)
+    if not resolved_path.startswith(base_path):
+        st.error("Ungültiger Zugriffspfad.")
+        st.stop()
+        
     if os.path.exists(file_dir) and os.path.isdir(file_dir):
         files = os.listdir(file_dir)
         raw_file = next((f for f in files if f.startswith("raw_")), None)
@@ -145,15 +213,26 @@ st.markdown("Lade XML-Dateien hoch, um sie auf Syntax und gegen XSD-Schemas zu v
 st.markdown("ℹ️ **Angewendete Schemas:** Offizielle XML Schema Packages der **ASD S1000D Issues 2.3, 3.0, 4.0.1, 4.1, 4.2 und 5.0** (automatische Erkennung)")
 
 def parse_xml(file_bytes):
-    """Parses XML and checks for well-formedness. Allows loading external DTDs like ISOEntities."""
-    parser = etree.XMLParser(recover=False, no_network=False, load_dtd=True)
+    """Parses XML and checks for well-formedness with timeout protection. Allows loading external DTDs like ISOEntities."""
+    # Sicherheitsmaßnahme: no_network=True verhindert externe Netzwerkanfragen (XXE Schutz)
+    parser = etree.XMLParser(recover=False, no_network=True, load_dtd=True)
     try:
         tree = etree.parse(io.BytesIO(file_bytes), parser)
         return tree, True, "Erfolgreich"
+    except socket.timeout:
+        return None, False, f"Parsing-Timeout (Datei zu groß für {socket.getdefaulttimeout()}s)"
     except etree.XMLSyntaxError as e:
         return None, False, f"Zeile {e.lineno}: {e.msg}"
+    except ValueError as e:
+        # UTF-8 Decoding Fehler
+        return None, False, f"Enkodierungsfehler: {str(e)[:200]}"
+    except OSError as e:
+        # Speicher-Fehler
+        return None, False, f"Speicher-Fehler: {str(e)}"
     except Exception as e:
-        return None, False, str(e)
+        # Unbekannte Fehler kategorisieren
+        error_type = type(e).__name__
+        return None, False, f"{error_type}: {str(e)[:500]}"
 
 @st.cache_resource
 def load_schema(xsd_path):
@@ -281,29 +360,10 @@ def detect_issue_and_xsd(tree):
             for issue in ISSUES:
                 p = os.path.join(SCHEMAS_DIR, issue["folder"], schema_file)
                 if os.path.exists(p):
-                    # If we don't have a detected issue, check if it validates
+                    xsd_path = p
                     if not detected_issue:
-                        try:
-                            schema = load_schema(p)
-                            if schema.validate(tree):
-                                detected_issue = issue
-                                xsd_path = p
-                                break
-                        except:
-                            pass
-                    else:
-                        xsd_path = p
-                        break
-            
-            # Final fallback: first folder containing the file
-            if not xsd_path:
-                for issue in ISSUES:
-                    p = os.path.join(SCHEMAS_DIR, issue["folder"], schema_file)
-                    if os.path.exists(p):
-                        xsd_path = p
-                        if not detected_issue:
-                            detected_issue = issue
-                        break
+                        detected_issue = issue
+                    break
 
     # If no schema file found, infer by tag
     if not xsd_path:
@@ -384,15 +444,16 @@ def format_error(line, message):
         return f"Zeile {line}: {translate_error(message)}"
 
 def validate_xml(tree, xsd_path):
-    """Validates XML tree against given XSD path."""
+    """Validates XML tree against given XSD path using thread-safe assertValid."""
     try:
         schema = load_schema(xsd_path)
         
-        if schema.validate(tree):
+        try:
+            schema.assertValid(tree)
             return True, "Erfolgreich"
-        else:
+        except etree.DocumentInvalid as e:
             errors_list = []
-            for err in schema.error_log:
+            for err in e.error_log:
                 errors_list.append(format_error(err.line, err.message))
             errors = " | ".join(errors_list)
             return False, errors
@@ -400,87 +461,116 @@ def validate_xml(tree, xsd_path):
     except Exception as e:
         return False, f"Fehler beim Laden/Validieren des Schemas: {str(e)}"
 
-# File uploader
-uploaded_files = st.file_uploader("XML Dateien hierher ziehen (Drag & Drop) oder auswählen", type="xml", accept_multiple_files=True)
-
-if uploaded_files:
-    results = []
+def process_single_file(uploaded_file):
+    """Parses, detects schema, and validates a single uploaded XML file."""
+    file_bytes = uploaded_file.read()
+    filename = uploaded_file.name
     
-    for uploaded_file in uploaded_files:
-        file_bytes = uploaded_file.read()
-        filename = uploaded_file.name
+    xml_id = str(uuid.uuid4())
+    file_dir = os.path.join(TEMP_XML_DIR, xml_id)
+    os.makedirs(file_dir, exist_ok=True)
+    
+    safe_filename = sanitize_filename(filename)
         
-        xml_id = str(uuid.uuid4())
-        file_dir = os.path.join(TEMP_XML_DIR, xml_id)
-        os.makedirs(file_dir, exist_ok=True)
-        
-        safe_filename = "".join([c for c in filename if c.isalnum() or c in (' ', '.', '-', '_')]).rstrip()
-        if not safe_filename:
-            safe_filename = "unnamed.xml"
-            
-        raw_filepath = os.path.join(file_dir, f"raw_{safe_filename}")
-        pretty_filepath = os.path.join(file_dir, f"pretty_{safe_filename}")
-        
-        # 1. Parsing
-        tree, parse_success, parse_msg = parse_xml(file_bytes)
-        
-        # Immer die Originaldatei speichern (für korrekte Zeilennummern bei Validierungsfehlern)
-        try:
-            raw_xml = file_bytes.decode('utf-8')
-        except:
-            raw_xml = str(file_bytes)
+    raw_filepath = os.path.join(file_dir, f"raw_{safe_filename}")
+    pretty_filepath = os.path.join(file_dir, f"pretty_{safe_filename}")
+    
+    # 1. Parsing
+    tree, parse_success, parse_msg = parse_xml(file_bytes)
+    
+    # Immer die Originaldatei speichern (für korrekte Zeilennummern bei Validierungsfehlern)
+    try:
+        raw_xml = file_bytes.decode('utf-8')
+    except Exception:
+        raw_xml = str(file_bytes)
+    try:
         with open(raw_filepath, "w", encoding="utf-8") as f:
             f.write(raw_xml)
-            
-        # Wenn geparst werden konnte, auch eine formatierte Version speichern
-        if parse_success:
+    except Exception:
+        pass
+        
+    # Wenn geparst werden konnte, auch eine formatierte Version speichern
+    if parse_success:
+        try:
             beautified_xml = etree.tostring(tree, pretty_print=True, encoding='unicode')
             with open(pretty_filepath, "w", encoding="utf-8") as f:
                 f.write(beautified_xml)
+        except Exception:
+            pass
+    
+    if not parse_success:
+        return {
+            "__xml_id": xml_id,
+            "Dateiname": filename,
+            "Erkannter Issue": "N/A",
+            "Status (Parsing)": "Fehlerhaft",
+            "Status (Validierung)": "N/A",
+            "Angewendetes Schema": "N/A",
+            "Fehlerdetails": parse_msg
+        }
         
-        if not parse_success:
-            results.append({
-                "__xml_id": xml_id,
-                "Dateiname": filename,
-                "Erkannter Issue": "N/A",
-                "Status (Parsing)": "Fehlerhaft",
-                "Status (Validierung)": "N/A",
-                "Angewendetes Schema": "N/A",
-                "Fehlerdetails": parse_msg
-            })
-            continue
-            
-        # 2. Schema Detection & Version Detection
-        detected_issue, xsd_path, schema_hint = detect_issue_and_xsd(tree)
-        
-        if not xsd_path:
-            results.append({
-                "__xml_id": xml_id,
-                "Dateiname": filename,
-                "Erkannter Issue": f"Issue {detected_issue['name']}" if detected_issue else "Unbekannt",
-                "Status (Parsing)": "Erfolgreich",
-                "Status (Validierung)": "Fehlerhaft",
-                "Angewendetes Schema": f"Nicht gefunden ({schema_hint})" if schema_hint else "Nicht gefunden",
-                "Fehlerdetails": "Kein passendes XSD im /schemas/ Ordner gefunden."
-            })
-            continue
-            
-        # 3. Validation
-        val_success, val_msg = validate_xml(tree, xsd_path)
-        xsd_filename = os.path.basename(xsd_path)
-        
-        results.append({
+    # 2. Schema Detection & Version Detection
+    detected_issue, xsd_path, schema_hint = detect_issue_and_xsd(tree)
+    
+    if not xsd_path:
+        return {
             "__xml_id": xml_id,
             "Dateiname": filename,
             "Erkannter Issue": f"Issue {detected_issue['name']}" if detected_issue else "Unbekannt",
             "Status (Parsing)": "Erfolgreich",
-            "Status (Validierung)": "Erfolgreich" if val_success else "Fehlerhaft",
-            "Angewendetes Schema": xsd_filename,
-            "Fehlerdetails": val_msg if not val_success else ""
-        })
+            "Status (Validierung)": "Fehlerhaft",
+            "Angewendetes Schema": f"Nicht gefunden ({schema_hint})" if schema_hint else "Nicht gefunden",
+            "Fehlerdetails": "Kein passendes XSD im /schemas/ Ordner gefunden."
+        }
         
-    df = pd.DataFrame(results)
+    # 3. Validation
+    val_success, val_msg = validate_xml(tree, xsd_path)
+    xsd_filename = os.path.basename(xsd_path)
     
+    return {
+        "__xml_id": xml_id,
+        "Dateiname": filename,
+        "Erkannter Issue": f"Issue {detected_issue['name']}" if detected_issue else "Unbekannt",
+        "Status (Parsing)": "Erfolgreich",
+        "Status (Validierung)": "Erfolgreich" if val_success else "Fehlerhaft",
+        "Angewendetes Schema": xsd_filename,
+        "Fehlerdetails": val_msg if not val_success else ""
+    }
+
+# File uploader
+uploaded_files = st.file_uploader("XML Dateien hierher ziehen (Drag & Drop) oder auswählen", type="xml", accept_multiple_files=True)
+
+if uploaded_files:
+    # 0. Bereinigung alter temporärer Verzeichnisse bei jedem Upload-Event ausführen
+    cleanup_expired_temp_files()
+    
+    # Eindeutige ID für diesen Satz von Dateien (Name und Größe kombinieren)
+    upload_id = "-".join([f"{f.name}_{f.size}" for f in uploaded_files])
+    
+    # Prüfen, ob sich der Upload geändert hat oder noch nichts validiert wurde
+    if "last_upload_id" not in st.session_state or st.session_state.last_upload_id != upload_id:
+        # Parallelisierte Validierung mit ThreadPoolExecutor
+        with concurrent.futures.ThreadPoolExecutor() as executor:
+            results = list(executor.map(process_single_file, uploaded_files))
+            
+        df = pd.DataFrame(results)
+        
+        # Excel Export Daten einmalig generieren
+        output = io.BytesIO()
+        export_df = df.drop(columns=['__xml_id'])
+        with pd.ExcelWriter(output, engine='openpyxl') as writer:
+            export_df.to_excel(writer, index=False, sheet_name='Validierungsergebnisse')
+        export_data = output.getvalue()
+        
+        # In Session-State speichern
+        st.session_state.validation_results = df
+        st.session_state.excel_data = export_data
+        st.session_state.last_upload_id = upload_id
+    else:
+        # Ergebnisse aus dem Session-State laden (verhindert Neuberechnung bei UI-Reruns)
+        df = st.session_state.validation_results
+        export_data = st.session_state.excel_data
+        
     # Summary Metrics
     st.subheader("Zusammenfassung")
     total_files = len(df)
@@ -491,13 +581,6 @@ if uploaded_files:
     col1.metric("Gesamtanzahl Dateien", total_files)
     col2.metric("Erfolgreich", successful)
     col3.metric("Fehlerhaft", failed)
-    
-    # Excel Export Data Generation
-    output = io.BytesIO()
-    export_df = df.drop(columns=['__xml_id'])
-    with pd.ExcelWriter(output, engine='openpyxl') as writer:
-        export_df.to_excel(writer, index=False, sheet_name='Validierungsergebnisse')
-    export_data = output.getvalue()
     
     # Display Table Header with Download Button
     header_col1, header_col2 = st.columns([3, 1])

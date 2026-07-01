@@ -7,6 +7,9 @@ Eine moderne, Streamlit-basierte Web-Applikation zur schnellen und automatisiert
 - **Drag & Drop Upload**: Gleichzeitiges Hochladen und Prüfen von hunderten XML-Dateien.
 - **Automatische Schema-Erkennung**: Die App analysiert das Root-Element (`xsi:noNamespaceSchemaLocation`, `xsi:schemaLocation` oder Namespaces), um vollautomatisch das passende XSD-Schema im lokalen Verzeichnis zu finden.
 - **Detaillierte Validierung**: Prüft zunächst auf "Well-formedness" (XML-Syntax) und führt anschließend eine strenge Schema-Validierung (XSD) via `lxml` durch.
+- **Hochperformance durch Parallelisierung**: Die Validierung mehrerer Dokumente erfolgt über einen `ThreadPoolExecutor` parallel, was die Verarbeitungsgeschwindigkeit bei großen Dateimengen drastisch erhöht.
+- **Blitzschnelles UI-Caching**: Zwischenspeicherung der Validierungsergebnisse in `st.session_state` sorgt dafür, dass Interaktionen in der Benutzeroberfläche (z. B. Umblättern oder Tabellensortierungen) verzögerungsfrei geladen werden, ohne die XMLs neu zu validieren.
+- **Robuster Sicherheitsstandard**: Integrierter Schutz vor XML External Entity (XXE) Injection sowie Pfad-Traversal-Schutz im XML-Viewer. Vollständige Thread-Safety sorgt für einen sicheren und stabilen Betrieb bei zeitgleicher Nutzung durch mehrere Anwender.
 - **Integrierter XML-Viewer**: Klickbare Dateinamen in der Ergebnistabelle öffnen die entsprechende XML-Datei in einem neuen Tab – sauber strukturiert ("beautified"), mit Syntax-Highlighting und Zeilennummern.
 - **Vibrant Dark Mode UI**: Modernes Dashboard mit dynamischen Schatten, Hover-Effekten und Neon-Akzentfarben für direktes visuelles Feedback.
 - **Excel-Export**: Lade die gesamten Validierungsergebnisse mit einem Klick als übersichtliche `.xlsx`-Datei herunter.
